@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<head>
+<title>Solar System</title>
+<script src="three.min.js"></script>
+<script src="KeyboardState.js"></script>
+
+<script>
+
+// Extra Credit: I implemented an update function that allowed me to use the arrow keys on my keyboard to "zoom in" and "zoom out" and to move "up" and "down".  I used if statements and stated that if a certain key is pressed perform a certain task.  I then called the update() function in the render() function.  
+//** Note: The homework shows up best in Safari.  All the textures and stars are shown with minimal skipping **
+
+    var scene, camera, renderer;  // Three.js rendering basics.
+
+    var canvas;  // The canvas on which the image is rendered.
+
+    var dirLight; // Our directional light is global so we can change its position.
+    var angle = 0; 
+    var angle1 = 0;   // The angle (about the y-axis) of the directional light.
+
+    var sunSphere;
+    var earthSphere;
+    var moonSphere;
+    var solarSystem;
+    var moonEarth;
+    var star;
+    var keyboard = new KeyboardState();
+
+    // Create the scene. This function is called once, as soon as the page loads.
+    // The renderer has already been created before this function is called.
+    function createWorld() {
+        
+        renderer.setClearColor(0); // Set background color (0, or 0x000000, is black).
+        scene = new THREE.Scene(); // Create a new scene which we can add objects to.
+    
+        // create a camera, sitting on the positive z-axis.  The camera is not part of the scene.
+        camera = new THREE.PerspectiveCamera(45, canvas.width/canvas.height, 0.1, 900);
+        camera.position.z = 300; // pull back the camera
+        camera.position.y = 0;
+
+        ambientLight = new THREE.AmbientLight('gray');
+        //scene.add(ambientLight);
+
+        // directional light
+        dirLight = new THREE.DirectionalLight('white',.5);
+        dirLight.position.set( 0, 0, 0 );
+        scene.add(dirLight);
+
+        pointLight = new THREE.PointLight('white', 3);
+        pointLight.position.set(0,0,0);
+        scene.add(pointLight);
+        //scene.add(new THREE.PointLightHelper(pointLight, 3));
+
+        // // set up the sphere vars
+        // var radius = 30,
+        //     segments = 16,
+        //     rings = 16;
+
+        // // create the sphere's material
+        // var sphereGeometry = new THREE.SphereGeometry(radius, segments, rings);
+        // var sphereMaterial = new THREE.MeshLambertMaterial({ color: "orange" });
+        // var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+        // // add the sphere to the scene
+        // scene.add(sphere); 
+}
+
+function solarSystem() {
+    var SRadius = 40;   // Sun Radius
+    var ERadius = 10;   // Earth Radius
+    var MRadius = 5;   // Moon Radius
+    var segments = 16;
+    var rings = 16;
+
+    // Create Sun
+    var sunGeometry = new THREE.SphereGeometry(SRadius, segments, rings);
+    //var sunMaterial = new THREE.MeshLambertMaterial({color: "orange", opacity: 0.5,
+     //                                               transparent: true});
+    var sunTexture = THREE.ImageUtils.loadTexture("sun.jpg");
+    var sunMaterial = new THREE.MeshPhongMaterial( { map: sunTexture, opacity: 0.5, transparent: true } );
+    sunSphere = new THREE.Mesh(sunGeometry, sunMaterial);
+
+    solarSystem = new THREE.Object3D();
+    moonEarth = new THREE.Object3D();
+    
+        //scene.add(sunEarth);
+
+    // Create Earth
+    var earthGeometry = new THREE.SphereGeometry(ERadius, segments, rings);
+    var earthTexture = THREE.ImageUtils.loadTexture("earth.jpg");
+    var earthMaterial = new THREE.MeshPhongMaterial( { map: earthTexture } );
+    //var earthMaterial = new THREE.MeshLambertMaterial({color: "blue"});
+
+
+    earthSphere = new THREE.Mesh(earthGeometry, earthMaterial);
+
+    // Create Moon
+    var moonGeometry = new THREE.SphereGeometry(MRadius, segments, rings);
+    var moonTexture = THREE.ImageUtils.loadTexture("moon.jpg");
+    var moonMaterial = new THREE.MeshPhongMaterial( { map: moonTexture } );
+    //var moonMaterial = new THREE.MeshLambertMaterial({color: "white"});
+    moonSphere = new THREE.Mesh(moonGeometry, moonMaterial);
+
+    scene.add(sunSphere);
+
+    //earthSphere.position.x = 100;
+    scene.add(earthSphere);
+
+    moonSphere.position.x = 20;
+    scene.add(moonSphere);
+
+    moonEarth.add(earthSphere);
+    moonEarth.add(moonSphere);
+
+    moonEarth.position.x = 100;
+    moonEarth.position.y = .1;
+
+    scene.add(moonEarth);
+
+    solarSystem.add(sunSphere);
+    solarSystem.add(moonEarth);
+
+    //solarSystem.add(moonEarth);
+
+    
+    scene.add(solarSystem);
+}
+function update() {
+        keyboard.update();
+
+        if ( keyboard.pressed("left") ) {
+            camera.position.z -= 0.5;
+        }
+        if ( keyboard.pressed("right") ) {
+            camera.position.z += 0.5;
+        }
+        if ( keyboard.pressed("down") ) {
+            camera.position.y -= 0.5;
+        }
+        if ( keyboard.pressed("up") ) {
+            camera.position.y += 0.5;
+        }
+        // if ( keyboard.pressed("tab") ) {
+        //     camera.position.x += 0.5;
+        // }
+        // if ( keyboard.pressed("backspace") ) {
+        //     camera.position.x -= 0.5;
+        // }
+    }
+
+
+    // Render the scene. This is called for each frame of the animation.
+    function render() {
+        requestAnimationFrame( render );
+        solarSystem.rotation.y += .01;
+        moonEarth.rotation.y += .01;
+
+        // moonEarth.position.x = Math.sin(angle1*.01)*100;
+        // moonEarth.position.z = Math.cos(angle1*.01)*10;
+
+
+        // earthSphere.position.x = Math.sin(angle1*.01)*1000;
+        // earthSphere.position.z = Math.cos(angle1*.01)*100;
+ 
+
+
+        // TODO animation here
+        dirLight.position.x = Math.sin(angle);
+        dirLight.position.y = 0;
+        dirLight.position.z = Math.cos(angle);
+       // angle += 0.01;
+
+   
+       
+  
+        renderer.render(scene, camera);
+        update();
+    }
+
+    function makeStars(r,cx,cy,cz){
+        var geometry = new THREE.SphereGeometry(r, 50, 50);
+        var material = new THREE.MeshBasicMaterial( {color: 'white', opacity: 1, transparent: false} );
+        star = new THREE.Mesh( geometry, material );
+        //var r = Math.random();
+        star.position.z = cz;
+        star.position.x = cx;
+        star.position.y = cy; 
+        //cube.rotation.y += 0.01;
+        scene.add( star );
+    }
+    //----------------------------------------------------------------------------------
+
+    // The init() function is called by the onload event when the document has loaded.
+    function init() {
+        try {
+            canvas = document.getElementById("glcanvas");
+            renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true} );
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML = "<h3><b>WebGL is not available.</b><h3>";
+            return;
+        }
+    
+        // create world and render scene
+        createWorld();
+        solarSystem();
+        for(var i =0; i < 1000; i++){
+            var x = (Math.random()*2-1)*400;
+            var y = (Math.random()*2-1)*400;
+            var z = (Math.random()*2-1.5)*400;
+
+            // var a = (Math.random()*2-1)*500;
+            // var b = (Math.random()*2-1)*500;
+            // var c = (Math.random()*2-1.5)*500;
+
+            makeStars(.5,x,y,z);
+            //makeStars(.5,a,b,c);
+
+            //makeStars.position = x;
+        }
+    
+
+        render();
+    }
+
+</script>
+
+</head>
+<body onload="init()">
+<div id="canvas-holder">
+    <canvas id="glcanvas" width="600" height="400"></canvas>
+</div>
+</body>
+</html>
